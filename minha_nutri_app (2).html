@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Nutri 🥑</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #2D6A4F;
+  --green-light: #52B788;
+  --green-pale: #D8F3DC;
+  --cream: #FEFAE0;
+  --orange: #E76F51;
+  --yellow: #F4A261;
+  --dark: #1B1B1B;
+  --gray: #6B6B6B;
+  --border: #E8E8E8;
+  --white: #FFFFFF;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--dark); min-height: 100vh; }
+
+.header {
+  background: var(--green);
+  color: white;
+  padding: 20px 20px 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.header-top h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+.date-pill { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
+.nav { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 0; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav-btn {
+  white-space: nowrap; padding: 10px 16px; border-radius: 12px 12px 0 0;
+  border: none; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn.active { background: var(--cream); color: var(--green); font-weight: 600; }
+
+.content { padding: 20px; max-width: 500px; margin: 0 auto; }
+.tab { display: none; }
+.tab.active { display: block; }
+
+.card {
+  background: var(--white); border-radius: var(--radius); padding: 18px;
+  margin-bottom: 14px; border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.card-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+.section-label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; font-weight: 500; }
+
+.greeting { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 4px; }
+.greeting span { color: var(--green); }
+.sub { font-size: 14px; color: var(--gray); margin-bottom: 20px; }
+
+/* DAY FILTER - HOJE TAB */
+.day-filter-bar { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 4px; scrollbar-width: none; }
+.day-filter-bar::-webkit-scrollbar { display: none; }
+.day-filter-chip {
+  flex-shrink: 0; padding: 7px 13px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: white; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--gray);
+  transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.day-filter-chip .chip-day { font-size: 11px; font-weight: 500; }
+.day-filter-chip .chip-date { font-size: 13px; font-weight: 700; }
+.day-filter-chip.today { border-color: var(--green-light); }
+.day-filter-chip.selected { background: var(--green); color: white; border-color: var(--green); }
+.day-filter-chip.has-data { position: relative; }
+.day-filter-chip.has-data::after { content:''; position:absolute; top:4px; right:4px; width:6px; height:6px; border-radius:50%; background: var(--green-light); }
+.day-filter-chip.selected.has-data::after { background: white; }
+
+.check-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.check-row:last-child { border: none; }
+.check-box {
+  width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+  transition: all 0.2s; font-size: 12px;
+}
+.check-box.done { background: var(--green); border-color: var(--green); color: white; }
+.check-label { font-size: 14px; color: var(--dark); flex: 1; }
+.check-sub { font-size: 12px; color: var(--gray); }
+
+.mood-row { display: flex; gap: 8px; margin: 8px 0; }
+.mood-btn {
+  flex: 1; padding: 10px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+  background: white; font-size: 20px; cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.mood-btn.sel { border-color: var(--green); background: var(--green-pale); }
+
+textarea, input[type=text], input[type=number] {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--dark); background: white; resize: none; outline: none; transition: border 0.2s;
+}
+textarea:focus, input:focus { border-color: var(--green-light); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+.btn-green { background: var(--green); color: white; width: 100%; }
+.btn-green:hover { background: #235c42; }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-outline { background: white; color: var(--green); border: 1.5px solid var(--green); }
+.btn-danger { background: #fee2e2; color: #dc2626; font-size: 12px; padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; }
+
+/* SAVED DAY VIEW */
+.saved-day-view { background: var(--green-pale); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; }
+.saved-day-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
+.saved-checks { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.saved-check { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: var(--green); color: white; }
+.saved-mood { font-size: 22px; }
+.saved-note { font-size: 13px; color: var(--dark); line-height: 1.6; margin-top: 6px; }
+
+/* CARDAPIO */
+.day-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+.day-scroll::-webkit-scrollbar { display: none; }
+.day-chip {
+  flex-shrink: 0; padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: white; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--gray);
+}
+.day-chip.active { background: var(--green); color: white; border-color: var(--green); }
+.meal-card { border-left: 3px solid var(--green-light); padding-left: 12px; margin-bottom: 14px; }
+.meal-time { font-size: 11px; color: var(--orange); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.meal-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.meal-items { font-size: 13px; color: var(--gray); line-height: 1.9; }
+
+/* TREINO */
+.exercise-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.exercise-row:last-child { border: none; }
+.ex-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all 0.2s; }
+.ex-check.done { background: var(--green-light); border-color: var(--green-light); color: white; }
+.ex-name { flex: 1; font-size: 14px; }
+.ex-sets { font-size: 12px; color: var(--gray); background: var(--green-pale); padding: 2px 8px; border-radius: 20px; }
+
+/* CHAT */
+.chat-box { height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; padding: 4px 0; }
+.msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
+.msg.ai { background: var(--green-pale); color: var(--dark); border-radius: 4px 16px 16px 16px; align-self: flex-start; }
+.msg.user { background: var(--green); color: white; border-radius: 16px 4px 16px 16px; align-self: flex-end; }
+.chat-input-row { display: flex; gap: 8px; }
+.chat-input-row input { flex: 1; }
+.send-btn { background: var(--green); color: white; border: none; border-radius: var(--radius-sm); padding: 10px 16px; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nutri-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.nutri-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.nutri-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+.nutri-status { font-size: 12px; color: var(--green-light); }
+
+/* API KEY SETUP */
+.api-setup { background: #fffbeb; border: 1.5px solid #f59e0b; border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px; }
+.api-setup p { font-size: 13px; color: #92400e; line-height: 1.5; margin-bottom: 10px; }
+.api-setup-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 6px; }
+.api-key-row { display: flex; gap: 8px; }
+.api-key-row input { flex: 1; font-size: 12px; }
+
+.loading-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: bounce 1s infinite; }
+.loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+/* HISTORICO */
+.hist-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.hist-row:last-child { border: none; }
+.hist-date { font-size: 13px; font-weight: 600; }
+.hist-sub { font-size: 12px; color: var(--gray); }
+.hist-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.badge-green { background: var(--green-pale); color: var(--green); }
+.badge-orange { background: #FFF0EB; color: var(--orange); }
+
+.input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.input-row input { flex: 1; }
+.input-label { font-size: 13px; color: var(--gray); margin-bottom: 4px; }
+
+/* ONLINE GUIDE MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal { background:white; border-radius:var(--radius); padding:24px; max-width:420px; width:100%; max-height:80vh; overflow-y:auto; }
+.modal h2 { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:var(--green); margin-bottom:12px; }
+.modal p { font-size:13px; line-height:1.7; color:var(--dark); margin-bottom:12px; }
+.modal ol { padding-left:18px; font-size:13px; line-height:2; color:var(--dark); }
+.modal .step-badge { display:inline-block; background:var(--green); color:white; border-radius:20px; padding:2px 10px; font-size:11px; font-weight:700; margin-right:6px; }
+.modal-close { width:100%; margin-top:16px; }
+
+.online-btn { background: var(--orange); color: white; border: none; border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>🥑 Minha Nutri</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="online-btn" onclick="document.getElementById('modal-online').classList.add('open')">🌐 Colocar online</button>
+      <span class="date-pill" id="date-pill"></span>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTab('hoje',this)">🏠 Hoje</button>
+    <button class="nav-btn" onclick="goTab('cardapio',this)">🥗 Cardápio</button>
+    <button class="nav-btn" onclick="goTab('treino',this)">💪 Treino</button>
+    <button class="nav-btn" onclick="goTab('historico',this)">📊 Histórico</button>
+    <button class="nav-btn" onclick="goTab('chat',this)">🤖 Nutri IA</button>
+  </nav>
+</div>
+
+<div class="content">
+
+  <!-- HOJE -->
+  <div class="tab active" id="tab-hoje">
+    <div class="greeting">Oi, <span>guerreira!</span> 👊</div>
+    <div class="sub" id="today-sub">Selecione um dia para ver ou registrar</div>
+
+    <!-- DAY FILTER -->
+    <div class="day-filter-bar" id="day-filter-bar"></div>
+
+    <!-- VIEW saved day -->
+    <div id="saved-day-view" style="display:none;"></div>
+
+    <!-- FORM for new/edit day -->
+    <div id="day-form">
+      <div class="card">
+        <div class="card-title">Como você está hoje?</div>
+        <div class="mood-row" id="mood-row">
+          <button class="mood-btn" onclick="setMood(this,'😩')">😩</button>
+          <button class="mood-btn" onclick="setMood(this,'😕')">😕</button>
+          <button class="mood-btn" onclick="setMood(this,'😐')">😐</button>
+          <button class="mood-btn" onclick="setMood(this,'🙂')">🙂</button>
+          <button class="mood-btn" onclick="setMood(this,'🔥')">🔥</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Check do dia</div>
+        <div class="check-row">
+          <div class="check-box" id="chk-gym" onclick="toggleCheck(this)"></div>
+          <div><div class="check-label">Fui para a academia</div><div class="check-sub">Musculação ou cardio</div></div>
+        </div>
+        <div class="check-row">
+          <div class="check-box" id="chk-diet" onclick="toggleCheck(this)"></div>
+          <div><div class="check-label">Segui o cardápio</div><div class="check-sub">Pelo menos nas refeições principais</div></div>
+        </div>
+        <div class="check-row">
+          <div class="check-box" id="chk-creatine" onclick="toggleCheck(this)"></div>
+          <div><div class="check-label">Tomei creatina</div><div class="check-sub">Todo dia, lembre-se!</div></div>
+        </div>
+        <div class="check-row">
+          <div class="check-box" id="chk-water" onclick="toggleCheck(this)"></div>
+          <div><div class="check-label">Bebi bastante água</div><div class="check-sub">Meta: 2,5 litros</div></div>
+        </div>
+        <div class="check-row">
+          <div class="check-box" id="chk-supps" onclick="toggleCheck(this)"></div>
+          <div><div class="check-label">Tomei Morozil e Cactin</div><div class="check-sub">Suplementos do dia</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Anotação do dia</div>
+        <textarea id="day-note" rows="3" placeholder="Como foi? O que comeu? Como se sentiu no treino? Escreva à vontade..."></textarea>
+        <br><br>
+        <button class="btn btn-green" onclick="saveDay()">💾 Salvar dia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDAPIO -->
+  <div class="tab" id="tab-cardapio">
+    <div class="card-title" style="padding:4px 0 12px;">Cardápio da semana</div>
+    <div class="day-scroll">
+      <div class="day-chip active" onclick="setDay(this,'seg')">Seg</div>
+      <div class="day-chip" onclick="setDay(this,'ter')">Ter</div>
+      <div class="day-chip" onclick="setDay(this,'qua')">Qua</div>
+      <div class="day-chip" onclick="setDay(this,'qui')">Qui</div>
+      <div class="day-chip" onclick="setDay(this,'sex')">Sex</div>
+      <div class="day-chip" onclick="setDay(this,'sab')">Sáb</div>
+      <div class="day-chip" onclick="setDay(this,'dom')">Dom</div>
+    </div>
+    <div id="cardapio-content"></div>
+  </div>
+
+  <!-- TREINO -->
+  <div class="tab" id="tab-treino">
+    <div class="card">
+      <div class="card-title">Divisão semanal</div>
+      <div class="check-row"><div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div><div><div class="check-label">Seg + Qui — Perna 🦵</div></div></div>
+      <div class="check-row"><div style="width:10px;height:10px;border-radius:50%;background:var(--orange);flex-shrink:0;"></div><div><div class="check-label">Ter + Sex — Superior 💪</div></div></div>
+      <div class="check-row" style="border:none;"><div style="width:10px;height:10px;border-radius:50%;background:var(--yellow);flex-shrink:0;"></div><div><div class="check-label">Ter + Qui (tarde) — Cardio 🏃‍♀️</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Treino de perna — marque o que fez</div>
+      <div id="exercise-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Treino superior</div>
+      <div id="exercise-list2"></div>
+    </div>
+
+    <div class="card" style="background:var(--green-pale);border-color:var(--green-light);">
+      <div class="card-title">🏃‍♀️ Cardio (2x por semana)</div>
+      <div class="meal-items">Esteira inclinada ou bike — 30 a 40 minutos<br>Ritmo confortável, conseguindo falar frases curtas<br>Ideal: terça e quinta à tarde</div>
+    </div>
+  </div>
+
+  <!-- HISTORICO -->
+  <div class="tab" id="tab-historico">
+    <div class="card">
+      <div class="card-title">Registrar peso e medidas</div>
+      <div class="input-label">Peso atual (kg)</div>
+      <div class="input-row">
+        <input type="number" id="inp-peso" placeholder="ex: 78.5" step="0.1">
+        <button class="btn btn-outline btn-sm" onclick="saveMedida()">Salvar</button>
+      </div>
+      <div class="input-label" style="margin-top:8px;">Medidas (cm) — opcional</div>
+      <div class="input-row">
+        <input type="number" id="inp-cintura" placeholder="Cintura">
+        <input type="number" id="inp-quadril" placeholder="Quadril">
+      </div>
+      <div class="input-label" style="font-size:11px;color:var(--gray);">Recomendado: pesar só 1x por semana, sempre no mesmo horário ✨</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Histórico</div>
+      <div id="historico-list"><div style="font-size:13px;color:var(--gray);text-align:center;padding:16px 0;">Nenhum registro ainda.<br>Comece salvando seu peso acima!</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT IA -->
+  <div class="tab" id="tab-chat">
+    <div class="nutri-header">
+      <div class="nutri-avatar">🥑</div>
+      <div>
+        <div class="nutri-name">Dra. Abacate 🥑</div>
+        <div class="nutri-status">● Sua nutri IA · sempre online</div>
+      </div>
+    </div>
+
+    <!-- API KEY SETUP -->
+    <div class="api-setup" id="api-setup-box">
+      <div class="api-setup-title">🔑 Configure sua chave de IA</div>
+      <p>Para a Dra. Abacate funcionar, cole sua chave da Anthropic aqui. Ela fica salva só no seu aparelho (localStorage), não vai para nenhum servidor.</p>
+      <p style="font-size:11px;color:#b45309;">Pegue gratuitamente em: <strong>console.anthropic.com</strong> → API Keys</p>
+      <div class="api-key-row">
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-...">
+        <button class="btn btn-outline btn-sm" onclick="saveApiKey()">Salvar</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px;">
+      <div class="chat-box" id="chat-box"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Pergunte pra Dra. Abacate..." onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL - COLOCAR ONLINE -->
+<div class="modal-overlay" id="modal-online" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h2>🌐 Colocar o app online</h2>
+    <p>Para acessar pelo celular de qualquer lugar, siga esses passos simples — é grátis e leva 2 minutinhos!</p>
+    <ol>
+      <li><strong>Acesse</strong> <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--green);font-weight:600;">app.netlify.com/drop</a></li>
+      <li><strong>Arraste</strong> o arquivo <code style="background:#f3f4f6;padding:1px 5px;border-radius:4px;">minha_nutri_app.html</code> para a área indicada</li>
+      <li><strong>Aguarde</strong> alguns segundos — o Netlify gera um link automaticamente!</li>
+      <li><strong>Abra o link</strong> no celular e salve na tela inicial (no Safari: compartilhar → "Adicionar à Tela de Início")</li>
+    </ol>
+    <p style="margin-top:14px;font-size:12px;color:var(--gray);">✅ Totalmente grátis · ✅ Sem criar conta · ✅ Link permanente · ✅ Funciona como app no celular</p>
+    <p style="font-size:12px;color:#b45309;background:#fffbeb;border-radius:8px;padding:10px;margin-top:8px;">⚠️ Lembre de também configurar sua chave de API na aba "Nutri IA" para o chat funcionar.</p>
+    <button class="btn btn-green modal-close" onclick="document.getElementById('modal-online').classList.remove('open')">Entendi! 💚</button>
+  </div>
+</div>
+
+<script>
+// DATE
+const days = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const months = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const now = new Date();
+document.getElementById('date-pill').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+
+// TABS
+function goTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ---- DAY FILTER (HOJE TAB) ----
+let selectedDate = null;
+let selectedMood = null;
+
+function buildDayFilter() {
+  const bar = document.getElementById('day-filter-bar');
+  bar.innerHTML = '';
+  const hist = JSON.parse(localStorage.getItem('hist') || '[]');
+  const savedDates = hist.map(h => h.date);
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toLocaleDateString('pt-BR');
+    const dayName = days[d.getDay()].substring(0, 3);
+    const dayNum = d.getDate();
+    const isToday = i === 0;
+    const hasSave = savedDates.includes(dateStr);
+
+    const chip = document.createElement('div');
+    chip.className = 'day-filter-chip' + (isToday ? ' today' : '') + (hasSave ? ' has-data' : '');
+    chip.dataset.date = dateStr;
+    chip.innerHTML = `<span class="chip-day">${dayName}</span><span class="chip-date">${dayNum}</span>`;
+    chip.onclick = () => selectDay(dateStr, chip);
+    bar.appendChild(chip);
+
+    if (isToday) {
+      selectedDate = dateStr;
+      chip.classList.add('selected');
+    }
+  }
+  renderDayContent();
+}
+
+function selectDay(dateStr, chip) {
+  document.querySelectorAll('.day-filter-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  selectedDate = dateStr;
+  selectedMood = null;
+  resetForm();
+  renderDayContent();
+}
+
+function renderDayContent() {
+  const hist = JSON.parse(localStorage.getItem('hist') || '[]');
+  const entry = hist.find(h => h.date === selectedDate);
+
+  if (entry) {
+    // Show saved view with edit option
+    document.getElementById('day-form').style.display = 'none';
+    const view = document.getElementById('saved-day-view');
+    view.style.display = 'block';
+
+    const checkLabels = { gym:'Academia', diet:'Cardápio', creatine:'Creatina', water:'Água', supps:'Suplementos' };
+    const checks = entry.checks || [];
+    const checksHTML = checks.length > 0
+      ? checks.map(k => `<span class="saved-check">✓ ${checkLabels[k]||k}</span>`).join('')
+      : '<span style="font-size:12px;color:var(--gray)">Nenhum check marcado</span>';
+
+    view.innerHTML = `
+      <div class="saved-day-view">
+        <div class="saved-day-title">${entry.date} ${entry.mood || ''}</div>
+        <div class="saved-checks">${checksHTML}</div>
+        ${entry.note ? `<div class="saved-note">${entry.note}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="editDay('${entry.date}')">✏️ Editar dia</button>
+        <button class="btn-danger" onclick="deleteDay('${entry.date}')">🗑️ Excluir</button>
+      </div>
+    `;
+  } else {
+    document.getElementById('saved-day-view').style.display = 'none';
+    document.getElementById('day-form').style.display = 'block';
+  }
+
+  // Update sub text
+  const isToday = selectedDate === now.toLocaleDateString('pt-BR');
+  document.getElementById('today-sub').textContent = isToday
+    ? 'Como foi seu dia até agora?'
+    : `Registro de ${selectedDate}`;
+}
+
+function resetForm() {
+  document.querySelectorAll('.check-box').forEach(b => { b.classList.remove('done'); b.textContent = ''; });
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('day-note').value = '';
+}
+
+function editDay(dateStr) {
+  const hist = JSON.parse(localStorage.getItem('hist') || '[]');
+  const entry = hist.find(h => h.date === dateStr);
+  if (!entry) return;
+
+  document.getElementById('saved-day-view').style.display = 'none';
+  document.getElementById('day-form').style.display = 'block';
+
+  // Restore checks
+  const checkMap = { gym:'chk-gym', diet:'chk-diet', creatine:'chk-creatine', water:'chk-water', supps:'chk-supps' };
+  (entry.checks || []).forEach(k => {
+    const el = document.getElementById(checkMap[k]);
+    if (el) { el.classList.add('done'); el.textContent = '✓'; }
+  });
+
+  // Restore mood
+  if (entry.mood) {
+    document.querySelectorAll('.mood-btn').forEach(b => {
+      if (b.textContent === entry.mood) b.classList.add('sel');
+    });
+    selectedMood = entry.mood;
+  }
+
+  // Restore note
+  document.getElementById('day-note').value = entry.note || '';
+}
+
+function deleteDay(dateStr) {
+  if (!confirm('Excluir registro de ' + dateStr + '?')) return;
+  let hist = JSON.parse(localStorage.getItem('hist') || '[]');
+  hist = hist.filter(h => h.date !== dateStr);
+  localStorage.setItem('hist', JSON.stringify(hist));
+  buildDayFilter();
+  renderHist();
+}
+
+// MOOD
+function setMood(btn, emoji) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedMood = emoji;
+}
+
+// CHECK
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+}
+
+// SAVE DAY
+function saveDay() {
+  const note = document.getElementById('day-note').value;
+  const checks = [];
+  if (document.getElementById('chk-gym').classList.contains('done')) checks.push('gym');
+  if (document.getElementById('chk-diet').classList.contains('done')) checks.push('diet');
+  if (document.getElementById('chk-creatine').classList.contains('done')) checks.push('creatine');
+  if (document.getElementById('chk-water').classList.contains('done')) checks.push('water');
+  if (document.getElementById('chk-supps').classList.contains('done')) checks.push('supps');
+
+  let hist = JSON.parse(localStorage.getItem('hist') || '[]');
+  hist = hist.filter(h => h.date !== selectedDate);
+  hist.unshift({ date: selectedDate, note, checks, mood: selectedMood, saved: true });
+  localStorage.setItem('hist', JSON.stringify(hist.slice(0, 60)));
+
+  resetForm();
+  buildDayFilter();
+  renderHist();
+  alert('Dia salvo! 💚 Continue assim!');
+}
+
+buildDayFilter();
+
+// CARDAPIO DATA
+const cardapio = {
+  seg: [
+    { time:'5h40 · Café', name:'Omelete com tomate e cebolinha + banana', items:'🥚 2 ovos mexidos com tomate picado e cebolinha\n🍌 1 banana-prata\n☕ Café preto sem açúcar' },
+    { time:'10h · Almoço', name:'Patinho moído com arroz e salada', items:'🥩 150g patinho moído com alho, sal e cominho\n🍚 3 col. sopa arroz\n🥗 Alface + tomate + pepino + cenoura ralada + limão' },
+    { time:'Tarde · Lanche', name:'Iogurte com banana e canela', items:'🥛 200g iogurte natural desnatado\n🍌 1/2 banana fatiada\n🍂 Canela à vontade' },
+    { time:'18h · Jantar', name:'Alcatra grelhada com batata-doce e salada', items:'🥩 120g alcatra grelhada\n🍠 80g batata-doce cozida\n🥗 Alface + beterraba + cenoura + limão' }
+  ],
+  ter: [
+    { time:'5h40 · Café', name:'Tapioca com ovo e queijo branco + laranja', items:'🫓 1 tapioca (3 col. sopa de goma)\n🥚 1 ovo mexido dentro\n🧀 1 fatia queijo branco\n🍊 1 laranja-baía' },
+    { time:'10h · Almoço', name:'Músculo desfiado com arroz, feijão e salada', items:'🥩 150g músculo cozido e desfiado\n🍚 3 col. sopa arroz · 🫘 2 col. feijão\n🥗 Alface + tomate + pepino + limão' },
+    { time:'Tarde · Lanche', name:'2 ovos cozidos + maçã', items:'🥚 2 ovos cozidos\n🍎 1 maçã fuji' },
+    { time:'18h · Jantar', name:'Patinho moído com abobrinha e cenoura', items:'🥩 120g patinho moído\n🥒 Abobrinha + cenoura refogadas com alho\n🍅 Tomate por cima' }
+  ],
+  qua: [
+    { time:'5h40 · Café', name:'Iogurte com banana e canela', items:'🥛 200g iogurte natural desnatado\n🍌 1 banana-prata fatiada\n🍂 Canela à vontade' },
+    { time:'10h · Almoço', name:'Coxão mole grelhado com arroz e salada', items:'🥩 140g coxão mole grelhado\n🍚 3 col. sopa arroz\n🥗 Alface + cenoura + beterraba + azeite e limão' },
+    { time:'Tarde · Lanche', name:'2 ovos cozidos + laranja', items:'🥚 2 ovos cozidos\n🍊 1 laranja (a vitamina C ajuda a absorver o ferro!)' },
+    { time:'18h · Jantar', name:'Sopa de carne com legumes', items:'🥩 100g acém em cubinhos\n🥕 Cenoura + chuchu + cebola + tomate\n🧄 Alho e temperos naturais\n1 col. sopa macarrão cabelo de anjo' }
+  ],
+  qui: [
+    { time:'5h40 · Café', name:'Pão integral com ovo e tomate', items:'🍞 2 fatias pão integral\n🥚 1 ovo mexido\n🍅 Tomate fatiado + sal\n☕ Café preto' },
+    { time:'10h · Almoço', name:'Alcatra grelhada com batata-doce e salada', items:'🥩 150g alcatra grelhada\n🍠 100g batata-doce cozida\n🥗 Alface + pepino + tomate + cenoura + limão' },
+    { time:'Tarde · Lanche', name:'Iogurte + maçã', items:'🥛 150g iogurte natural desnatado\n🍎 1 maçã fuji' },
+    { time:'18h · Jantar', name:'Patinho moído com abobrinha e ovo', items:'🥩 100g patinho moído\n🥒 Abobrinha refogada\n🥚 1 ovo mexido junto\n🧄 Alho e sal' }
+  ],
+  sex: [
+    { time:'5h40 · Café', name:'Ovos mexidos com tomate + banana', items:'🥚 2 ovos mexidos com tomate e cebolinha\n🍌 1 banana-prata\n☕ Café preto' },
+    { time:'10h · Almoço', name:'Músculo desfiado com arroz, feijão e salada', items:'🥩 150g músculo desfiado\n🍚 3 col. arroz · 🫘 2 col. feijão\n🥗 Alface + beterraba + cenoura + azeite e limão' },
+    { time:'Tarde · Lanche', name:'Iogurte + laranja', items:'🥛 200g iogurte natural desnatado\n🍊 1 laranja ou tangerina' },
+    { time:'18h · Jantar', name:'Coxão mole grelhado com salada grande', items:'🥩 130g coxão mole grelhado\n🥗 Alface + tomate + pepino + cenoura + beterraba\nAzeite + limão + sal' }
+  ],
+  sab: [
+    { time:'Café · horário livre', name:'Panqueca de banana com ovo', items:'🍌 2 bananas amassadas + 🥚 2 ovos\nMistura tudo, faz na frigideira sem óleo\n🍯 Mel ou canela (opcional)' },
+    { time:'Almoço · horário livre', name:'Almoço completo — dia mais tranquilo', items:'🥩 Proteína à escolha\n🍚 Arroz + feijão\n🥗 Salada à vontade: alface, tomate, cenoura, beterraba' },
+    { time:'Tarde · Lanche', name:'Fruta + ovo cozido', items:'🍎 Maçã ou 🍊 laranja ou 🍌 banana\n🥚 1 ovo cozido' },
+    { time:'18h · Jantar', name:'Omelete de forno com legumes', items:'🥚 3 ovos\n🍅 Tomate + cenoura + cebola picados\n🧀 1 fatia queijo branco' }
+  ],
+  dom: [
+    { time:'Café · horário livre', name:'Café reforçado de domingo', items:'🥚 2 ovos mexidos com tomate\n🍞 2 fatias pão integral · 🧀 queijo branco\n🍊 1 laranja ou suco natural' },
+    { time:'Almoço · em família', name:'Come bem, com inteligência', items:'✅ Começa sempre pela salada\n🥩 Proteína + arroz e feijão\nEvite frituras e refrigerante' },
+    { time:'18h · Jantar', name:'Salada de atum ou ovos cozidos', items:'🐟 1 lata atum (único dia!) ou 🥚 3 ovos\n🥗 Alface + tomate + pepino + cenoura + limão' }
+  ]
+};
+
+function renderCardapio(day) {
+  const meals = cardapio[day];
+  const html = meals.map(m => `
+    <div class="meal-card">
+      <div class="meal-time">${m.time}</div>
+      <div class="meal-name">${m.name}</div>
+      <div class="meal-items">${m.items.replace(/\n/g,'<br>')}</div>
+    </div>`).join('');
+  document.getElementById('cardapio-content').innerHTML = html;
+}
+renderCardapio('seg');
+
+function setDay(chip, day) {
+  document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  renderCardapio(day);
+}
+
+// EXERCISES
+const perna = [
+  ['Agachamento (Squat)','3×12'],['Agachamento guiado','3×12'],
+  ['Leg press','4×12'],['Extensora','4×12'],['Flexora mesa','3×12'],
+  ['Glúteo coice','3×12'],['Adutora','3×12'],['Abdutora','3×12'],
+  ['Banco Romano','3×12'],['Passada com halter','3×20'],
+  ['Burrico / Gêmeos escadaria','4×12'],['Elevação pélvica','4×12']
+];
+const superior = [
+  ['Supino reto','3×12'],['Pulley frente','3×12'],['Remada sentada','3×12'],
+  ['Remada unilateral','3×12'],['Remada cavalinho','3×12'],
+  ['Desenvolvimento p/ frente','3×12'],['Elevação lateral','3×12'],
+  ['Elevação frontal','3×12'],['Tríceps pulley alto','3×12'],
+  ['Francês com dumbells','3×12'],['Rosca Scott','3×12'],['Rosca martelo','3×12'],
+  ['Flex/Ext. punho','2×?']
+];
+
+function renderEx(list, containerId) {
+  document.getElementById(containerId).innerHTML = list.map(([name,sets]) => `
+    <div class="exercise-row">
+      <div class="ex-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></div>
+      <div class="ex-name">${name}</div>
+      <div class="ex-sets">${sets}</div>
+    </div>`).join('');
+}
+renderEx(perna, 'exercise-list');
+renderEx(superior, 'exercise-list2');
+
+// HISTORICO
+function saveMedida() {
+  const peso = document.getElementById('inp-peso').value;
+  const cintura = document.getElementById('inp-cintura').value;
+  const quadril = document.getElementById('inp-quadril').value;
+  if(!peso) { alert('Informe o peso!'); return; }
+  const today = now.toLocaleDateString('pt-BR');
+  let meds = JSON.parse(localStorage.getItem('medidas')||'[]');
+  meds.unshift({ date: today, peso, cintura, quadril });
+  localStorage.setItem('medidas', JSON.stringify(meds.slice(0,30)));
+  document.getElementById('inp-peso').value='';
+  document.getElementById('inp-cintura').value='';
+  document.getElementById('inp-quadril').value='';
+  renderHist();
+}
+
+function renderHist() {
+  const meds = JSON.parse(localStorage.getItem('medidas')||'[]');
+  const hist = JSON.parse(localStorage.getItem('hist')||'[]');
+  const all = [];
+  meds.forEach(m => all.push({ date: m.date, type:'medida', data: m }));
+  hist.forEach(h => all.push({ date: h.date, type:'dia', data: h }));
+  if(!all.length) {
+    document.getElementById('historico-list').innerHTML = '<div style="font-size:13px;color:var(--gray);text-align:center;padding:16px 0;">Nenhum registro ainda.<br>Comece salvando seu peso acima!</div>';
+    return;
+  }
+  document.getElementById('historico-list').innerHTML = all.map(item => {
+    if(item.type==='medida') {
+      return `<div class="hist-row">
+        <div><div class="hist-date">${item.date}</div><div class="hist-sub">Peso: ${item.data.peso}kg ${item.data.cintura?'· Cintura: '+item.data.cintura+'cm':''} ${item.data.quadril?'· Quadril: '+item.data.quadril+'cm':''}</div></div>
+        <span class="hist-badge badge-green">⚖️ Peso</span>
+      </div>`;
+    } else {
+      const moodDisplay = item.data.mood ? item.data.mood + ' ' : '';
+      const notePreview = item.data.note ? item.data.note.slice(0,40)+(item.data.note.length>40?'...':'') : 'Dia registrado';
+      return `<div class="hist-row">
+        <div><div class="hist-date">${item.date}</div><div class="hist-sub">${moodDisplay}${notePreview}</div></div>
+        <span class="hist-badge badge-orange">📝 Dia</span>
+      </div>`;
+    }
+  }).join('');
+}
+renderHist();
+
+// ---- CHAT IA ----
+const apiSetupBox = document.getElementById('api-setup-box');
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-')) { alert('Chave inválida! Deve começar com sk-'); return; }
+  localStorage.setItem('nutri_api_key', key);
+  apiSetupBox.style.display = 'none';
+  document.getElementById('api-key-input').value = '';
+  alert('Chave salva! A Dra. Abacate já pode te atender 💚');
+}
+
+// Check if key already saved
+if (localStorage.getItem('nutri_api_key')) {
+  apiSetupBox.style.display = 'none';
+}
+
+const sysPrompt = `Você é a Dra. Abacate 🥑, uma nutricionista virtual simpática, divertida e muito cuidadosa. Você está ajudando uma jovem de 25 anos, 1,60m, que treina musculação 4x por semana e cardio 2x, com objetivo de emagrecer e ganhar força. Ela usa creatina, Morozil e Cactin.
+
+Responda sempre em português brasileiro, de forma amigável, curta e prática. Use emojis com moderação.
+
+Dicas para emagrecer de forma saudável e sustentável:
+- Beber 2,5L de água por dia mínimo — ajuda o Cactin a funcionar melhor
+- Não pular refeições — metabolismo precisa estar ativo
+- Creatina precisa de água para funcionar bem
+- Priorizar proteína em cada refeição para preservar músculo
+- Dormir bem — é quando o corpo recupera o músculo
+- Não exagerar no cardio para não sobrecarregar
+- Comer a salada sempre ANTES do prato principal — sacia e come menos
+- Evitar sal em excesso que retém líquido
+- Temperinhos naturais como limão, alho e gengibre são ótimos aliados
+- O músculo cozido na pressão é a proteína mais barata e eficiente
+
+Se alguém falar que está se sentindo mal, triste, ou com pensamentos difíceis sobre o corpo ou comida, responda com muito carinho, empatia e sugira apoio especializado. No Brasil existe apoio gratuito pelo AMBULIM (USP): (11) 2661-6960.
+
+Seja sempre gentil, nunca julgue, e lembre que saúde é processo, não sprint.`;
+
+const msgs = [{ role:'assistant', content:'Oi linda! 🥑 Sou a Dra. Abacate, sua nutri IA. Pode perguntar tudo — cardápio, treino, dúvidas, se faltou um dia na academia, o que trocar no prato... Tô aqui! 💚' }];
+
+function renderMsgs() {
+  const chatBox = document.getElementById('chat-box');
+  chatBox.innerHTML = msgs.map(m => `<div class="msg ${m.role==='assistant'?'ai':'user'}">${m.content.replace(/\n/g,'<br>')}</div>`).join('');
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+renderMsgs();
+
+async function sendMsg() {
+  const apiKey = localStorage.getItem('nutri_api_key');
+  if (!apiKey) {
+    apiSetupBox.style.display = 'block';
+    document.getElementById('api-key-input').focus();
+    return;
+  }
+
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+
+  msgs.push({ role:'user', content: text });
+  input.value = '';
+  renderMsgs();
+
+  const sendBtn = document.getElementById('send-btn');
+  sendBtn.disabled = true;
+
+  // loading
+  const chatBox = document.getElementById('chat-box');
+  const loadDiv = document.createElement('div');
+  loadDiv.className = 'msg ai';
+  loadDiv.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  chatBox.appendChild(loadDiv);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: sysPrompt,
+        messages: msgs
+      })
+    });
+
+    const data = await res.json();
+    if (res.status === 401) {
+      localStorage.removeItem('nutri_api_key');
+      apiSetupBox.style.display = 'block';
+      msgs.push({ role:'assistant', content:'Chave inválida ou expirada. Configure uma nova chave acima 🔑' });
+    } else if (res.status === 400) {
+      msgs.push({ role:'assistant', content:'Erro 400: ' + (data.error?.message || JSON.stringify(data)) });
+    } else if (!res.ok) {
+      msgs.push({ role:'assistant', content:'Erro ' + res.status + ': ' + (data.error?.message || JSON.stringify(data)) });
+    } else {
+      const reply = data.content?.[0]?.text || 'Ops, tive um probleminha aqui! Tenta de novo 😅';
+      msgs.push({ role:'assistant', content: reply });
+    }
+  } catch(err) {
+    msgs.push({ role:'assistant', content:'Erro de conexão: ' + err.message });
+  }
+
+  loadDiv.remove();
+  sendBtn.disabled = false;
+  renderMsgs();
+}
+</script>
+</body>
+</html>
